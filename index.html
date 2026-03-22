@@ -2,10 +2,17 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>공식 암기장</title>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="공식 암기장">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="apple-touch-icon" href="icon.png">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -23,8 +30,18 @@
     overflow: hidden;
   }
   
-  .top-right { position: absolute; top: 20px; right: 20px; }
-  .top-left { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; }
+  .top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  .top-left {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 8px;
+  }
 
   .btn-top {
     padding: 10px 12px;
@@ -37,12 +54,18 @@
     transition: transform 0.2s, background-color 0.2s;
     font-size: 13px;
   }
-  .btn-top:hover { transform: translateY(-2px); }
+  .btn-top:hover {
+    transform: translateY(-2px);
+  }
   .btn-master { background-color: #f1c40f; }
   .btn-backup { background-color: #ecf0f1; }
   .btn-restore { background-color: #ecf0f1; }
 
-  h1 { color: #333; margin-bottom: 20px; font-size: 28px; }
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 28px;
+  }
   
   .card-container {
     perspective: 1000px;
@@ -69,7 +92,9 @@
     transform-style: preserve-3d;
     cursor: pointer;
   }
-  .card.flipped { transform: rotateY(180deg); }
+  .card.flipped {
+    transform: rotateY(180deg);
+  }
   .card-face {
     position: absolute;
     width: 100%;
@@ -133,7 +158,11 @@
     width: 0%;
     transition: width 0.3s ease;
   }
-  .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
   .btn-nav {
     padding: 12px 20px;
     font-size: 15px;
@@ -146,9 +175,15 @@
     transition: all 0.2s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  .btn-nav:hover { background-color: #2c3e50; }
-  .btn-correct { background-color: #27ae60; }
-  .btn-correct:hover { background-color: #219653; }
+  .btn-nav:hover {
+    background-color: #2c3e50;
+  }
+  .btn-correct {
+    background-color: #27ae60;
+  }
+  .btn-correct:hover {
+    background-color: #219653;
+  }
   
   .btn-nav:disabled, .btn-correct:disabled {
     background-color: #bdc3c7 !important;
@@ -176,7 +211,9 @@
     justify-content: center;
     z-index: 100;
   }
-  .fab:hover { transform: scale(1.1); }
+  .fab:hover {
+    transform: scale(1.1);
+  }
 
   .modal-overlay {
     position: fixed;
@@ -198,35 +235,101 @@
     gap: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
-  .modal-content h2 { margin: 0; font-size: 20px; color: #333; text-align: center; }
+  .modal-content h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+    text-align: center;
+  }
   .modal-content input, .modal-content textarea {
-    padding: 10px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-family: inherit; resize: vertical;
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
   }
-  .modal-content input:focus, .modal-content textarea:focus { border-color: #2ecc71; }
+  .modal-content input:focus, .modal-content textarea:focus {
+    border-color: #2ecc71;
+  }
   
-  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
-  .toolbar button {
-    padding: 6px 10px; font-size: 12px; background-color: #ecf0f1; border: 1px solid #bdc3c7; border-radius: 6px; cursor: pointer; color: #2c3e50; font-weight: bold; transition: background-color 0.2s;
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
   }
-  .toolbar button:hover { background-color: #d5dbdb; }
+  .toolbar button {
+    padding: 6px 10px;
+    font-size: 12px;
+    background-color: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #2c3e50;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+  .toolbar button:hover {
+    background-color: #d5dbdb;
+  }
 
   .preview-box {
-    min-height: 50px; background-color: #f8f9f9; border: 1px dashed #bdc3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px; overflow-x: auto; color: #7f8c8d; font-size: 14px;
+    min-height: 50px;
+    background-color: #f8f9f9;
+    border: 1px dashed #bdc3c7;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow-x: auto;
+    color: #7f8c8d;
+    font-size: 14px;
   }
 
-  .modal-buttons { display: flex; gap: 10px; margin-top: 5px; }
-  .modal-buttons button { flex: 1; padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+  }
+  .modal-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
   .btn-cancel { background-color: #bdc3c7; color: white; }
   .btn-submit { background-color: #2ecc71; color: white; }
   .btn-delete { background-color: #e74c3c; color: white; display: none; }
   .btn-delete:hover { background-color: #c0392b; }
 
-  .mastered-list { overflow-y: auto; max-height: 300px; margin-top: 10px; }
+  .mastered-list {
+    overflow-y: auto;
+    max-height: 300px;
+    margin-top: 10px;
+  }
   
   .mastered-item {
-    padding: 12px; background-color: #f9f9f9; border-bottom: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; font-weight: bold; color: #f39c12; display: flex; justify-content: space-between; cursor: pointer; transition: background-color 0.2s;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #f39c12;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
-  .mastered-item:hover { background-color: #eef2f5; }
+  .mastered-item:hover {
+    background-color: #eef2f5;
+  }
   
   #view-modal { z-index: 300; }
   #file-input { display: none; }
@@ -284,6 +387,7 @@
     </div>
 
     <textarea id="new-content" rows="3" placeholder="공식 내용 (예: v = \frac{s}{t})" oninput="updatePreview()"></textarea>
+    
     <div id="preview-box" class="preview-box">수식 미리보기가 여기에 나와!</div>
     
     <div class="modal-buttons">
