@@ -110,14 +110,23 @@
     border: 1px solid #e0e0e0;
   }
   
-  /* ★ 카드 뒷면 (정답) 색상 수정 ★ */
+  /* 카드 뒷면 (정답) */
   .card-back {
-    background-color: #eafaf1; /* 눈이 편안한 아주 연한 연두색 */
-    color: #333333;           /* 진한 회색 글씨로 가독성 확보 */
+    background-color: #eafaf1; 
+    color: #333333;           
     transform: rotateY(180deg);
     border: 1px solid #d1f2eb;
+    /* ★ 상하좌우 스크롤 모두 허용 (글자가 최소 크기일 때 대비) ★ */
+    overflow: auto;
   }
   
+  /* 수식 컨테이너 */
+  #formula-display {
+    width: 100%;
+    transition: font-size 0.2s ease;
+    display: inline-block;
+  }
+
   .progress-container {
     width: 340px;
     display: flex;
@@ -137,7 +146,7 @@
   }
   .progress-bar-fill {
     height: 100%;
-    background-color: #2ecc71; /* 진행바는 기존 포인트 컬러 유지 */
+    background-color: #2ecc71; 
     width: 0%;
     transition: width 0.3s ease;
   }
@@ -333,7 +342,9 @@
 <div class="card-container" id="card-container">
   <div class="card" id="flashcard">
     <div class="card-face card-front" id="card-front">..</div>
-    <div class="card-face card-back" id="card-back">..</div>
+    <div class="card-face card-back" id="card-back">
+      <div id="formula-display">..</div>
+    </div>
   </div>
 </div>
 
@@ -416,6 +427,7 @@
   const card = document.getElementById('flashcard');
   const front = document.getElementById('card-front');
   const back = document.getElementById('card-back');
+  const formulaDisplay = document.getElementById('formula-display');
   const progressText = document.getElementById('progress-text');
   const progressBarFill = document.getElementById('progress-bar-fill');
   const btnCorrect = document.getElementById('btn-correct');
@@ -552,6 +564,34 @@
     saveData();
   }
 
+  // ★ 수식 가로/세로 자동 크기 조절 함수 ★
+  function renderAdjustedFormula(container, content) {
+    // 1. 기본 크기(26px)로 먼저 렌더링
+    container.style.fontSize = "26px";
+    katex.render(content, container, { displayMode: true, throwOnError: false });
+
+    // 2. 카드 내 제한 크기 (패딩 감안)
+    const maxWidth = 310; 
+    const maxHeight = 190;
+
+    // 3. 렌더링된 수식의 실제 너비와 높이 가져오기
+    const currentWidth = container.scrollWidth;
+    const currentHeight = container.scrollHeight;
+
+    // 4. 가로 또는 세로가 제한 크기를 넘어가면 비율 계산
+    if (currentWidth > maxWidth || currentHeight > maxHeight) {
+      let widthRatio = maxWidth / currentWidth;
+      let heightRatio = maxHeight / currentHeight;
+      
+      // 더 작게 쪼그라들어야 하는(더 빡빡한) 쪽 비율 선택
+      let finalRatio = Math.min(widthRatio, heightRatio);
+
+      // 5. 최소 12px 크기 제한 두기
+      const newSize = Math.max(12, Math.floor(26 * finalRatio));
+      container.style.fontSize = newSize + "px";
+    }
+  }
+
   function updateUI() {
     card.classList.remove('flipped');
     btnCorrect.disabled = true;
@@ -560,7 +600,9 @@
     setTimeout(() => {
       if (shuffledDeck.length === 0) {
         front.textContent = "🏆 완벽해!";
-        back.textContent = "모든 공식을 마스터했어!";
+        formulaDisplay.textContent = "모든 공식을 마스터했어!";
+        formulaDisplay.style.fontSize = "22px";
+        
         progressText.textContent = "0 / 0";
         progressBarFill.style.width = "100%";
         btnCorrect.textContent = "✔ 정답 (0/5)";
@@ -572,7 +614,9 @@
       const currentCard = shuffledDeck[currentIndex];
       
       front.textContent = currentCard.name;
-      katex.render(currentCard.content, back, { displayMode: true, throwOnError: false });
+      
+      // 가로 세로 모두 감안해서 렌더링
+      renderAdjustedFormula(formulaDisplay, currentCard.content);
       
       btnCorrect.textContent = `✔ 정답 (${currentCard.correctCount}/5)`;
       
