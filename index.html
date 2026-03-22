@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>공식 암기장</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
@@ -20,18 +23,8 @@
     overflow: hidden;
   }
   
-  .top-right {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-  }
-  .top-left {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    display: flex;
-    gap: 8px;
-  }
+  .top-right { position: absolute; top: 20px; right: 20px; }
+  .top-left { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; }
 
   .btn-top {
     padding: 10px 12px;
@@ -44,18 +37,12 @@
     transition: transform 0.2s, background-color 0.2s;
     font-size: 13px;
   }
-  .btn-top:hover {
-    transform: translateY(-2px);
-  }
+  .btn-top:hover { transform: translateY(-2px); }
   .btn-master { background-color: #f1c40f; }
   .btn-backup { background-color: #ecf0f1; }
   .btn-restore { background-color: #ecf0f1; }
 
-  h1 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 28px;
-  }
+  h1 { color: #333; margin-bottom: 20px; font-size: 28px; }
   
   .card-container {
     perspective: 1000px;
@@ -82,9 +69,7 @@
     transform-style: preserve-3d;
     cursor: pointer;
   }
-  .card.flipped {
-    transform: rotateY(180deg);
-  }
+  .card.flipped { transform: rotateY(180deg); }
   .card-face {
     position: absolute;
     width: 100%;
@@ -103,29 +88,27 @@
     word-break: keep-all;
   }
   
-  /* 카드 앞면 (문제) */
   .card-front {
     background-color: #ffffff;
     color: #2c3e50;
     border: 1px solid #e0e0e0;
   }
   
-  /* 카드 뒷면 (정답) */
   .card-back {
     background-color: #eafaf1; 
     color: #333333;           
     transform: rotateY(180deg);
     border: 1px solid #d1f2eb;
-    /* ★ 상하좌우 스크롤 모두 허용 (글자가 최소 크기일 때 대비) ★ */
     overflow: auto;
   }
   
-  /* 수식 컨테이너 */
   #formula-display {
     width: 100%;
     transition: font-size 0.2s ease;
     display: inline-block;
   }
+
+  .katex-display { margin: 10px 0 !important; }
 
   .progress-container {
     width: 340px;
@@ -150,11 +133,7 @@
     width: 0%;
     transition: width 0.3s ease;
   }
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+  .controls { display: flex; gap: 10px; margin-bottom: 20px; }
   .btn-nav {
     padding: 12px 20px;
     font-size: 15px;
@@ -167,15 +146,9 @@
     transition: all 0.2s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  .btn-nav:hover {
-    background-color: #2c3e50;
-  }
-  .btn-correct {
-    background-color: #27ae60;
-  }
-  .btn-correct:hover {
-    background-color: #219653;
-  }
+  .btn-nav:hover { background-color: #2c3e50; }
+  .btn-correct { background-color: #27ae60; }
+  .btn-correct:hover { background-color: #219653; }
   
   .btn-nav:disabled, .btn-correct:disabled {
     background-color: #bdc3c7 !important;
@@ -203,9 +176,7 @@
     justify-content: center;
     z-index: 100;
   }
-  .fab:hover {
-    transform: scale(1.1);
-  }
+  .fab:hover { transform: scale(1.1); }
 
   .modal-overlay {
     position: fixed;
@@ -227,99 +198,35 @@
     gap: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
-  .modal-content h2 {
-    margin: 0;
-    font-size: 20px;
-    color: #333;
-    text-align: center;
-  }
+  .modal-content h2 { margin: 0; font-size: 20px; color: #333; text-align: center; }
   .modal-content input, .modal-content textarea {
-    padding: 10px;
-    font-size: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    outline: none;
-    font-family: inherit;
-    resize: vertical;
+    padding: 10px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-family: inherit; resize: vertical;
   }
-  .modal-content input:focus, .modal-content textarea:focus {
-    border-color: #2ecc71;
-  }
+  .modal-content input:focus, .modal-content textarea:focus { border-color: #2ecc71; }
   
-  .toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 2px;
-  }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
   .toolbar button {
-    padding: 6px 10px;
-    font-size: 12px;
-    background-color: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #2c3e50;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    padding: 6px 10px; font-size: 12px; background-color: #ecf0f1; border: 1px solid #bdc3c7; border-radius: 6px; cursor: pointer; color: #2c3e50; font-weight: bold; transition: background-color 0.2s;
   }
-  .toolbar button:hover {
-    background-color: #d5dbdb;
-  }
+  .toolbar button:hover { background-color: #d5dbdb; }
 
   .preview-box {
-    min-height: 50px;
-    background-color: #f8f9f9;
-    border: 1px dashed #bdc3c7;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    overflow-x: auto;
-    color: #7f8c8d;
-    font-size: 14px;
+    min-height: 50px; background-color: #f8f9f9; border: 1px dashed #bdc3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px; overflow-x: auto; color: #7f8c8d; font-size: 14px;
   }
 
-  .modal-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 5px;
-  }
-  .modal-buttons button {
-    flex: 1;
-    padding: 12px;
-    font-size: 15px;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
+  .modal-buttons { display: flex; gap: 10px; margin-top: 5px; }
+  .modal-buttons button { flex: 1; padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
   .btn-cancel { background-color: #bdc3c7; color: white; }
   .btn-submit { background-color: #2ecc71; color: white; }
+  .btn-delete { background-color: #e74c3c; color: white; display: none; }
+  .btn-delete:hover { background-color: #c0392b; }
 
-  .mastered-list {
-    overflow-y: auto;
-    max-height: 300px;
-    margin-top: 10px;
-  }
+  .mastered-list { overflow-y: auto; max-height: 300px; margin-top: 10px; }
   
   .mastered-item {
-    padding: 12px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #eee;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #f39c12;
-    display: flex;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    padding: 12px; background-color: #f9f9f9; border-bottom: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; font-weight: bold; color: #f39c12; display: flex; justify-content: space-between; cursor: pointer; transition: background-color 0.2s;
   }
-  .mastered-item:hover {
-    background-color: #eef2f5;
-  }
+  .mastered-item:hover { background-color: #eef2f5; }
   
   #view-modal { z-index: 300; }
   #file-input { display: none; }
@@ -377,11 +284,11 @@
     </div>
 
     <textarea id="new-content" rows="3" placeholder="공식 내용 (예: v = \frac{s}{t})" oninput="updatePreview()"></textarea>
-    
     <div id="preview-box" class="preview-box">수식 미리보기가 여기에 나와!</div>
     
     <div class="modal-buttons">
       <button class="btn-cancel" onclick="closeFormModal()">취소</button>
+      <button class="btn-delete" id="modal-delete-btn" onclick="deleteFormula()">삭제</button>
       <button class="btn-submit" id="modal-submit-btn" onclick="submitFormula()">추가하기</button>
     </div>
   </div>
@@ -468,11 +375,7 @@
   }
 
   function downloadBackup() {
-    const data = {
-      activeFormulas: activeFormulas,
-      masteredFormulas: masteredFormulas,
-      deckCycleCount: deckCycleCount
-    };
+    const data = { activeFormulas, masteredFormulas, deckCycleCount };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
@@ -544,6 +447,7 @@
 
   function resetDeck() {
     deckCycleCount++;
+    
     for (let i = masteredFormulas.length - 1; i >= 0; i--) {
       let mCard = masteredFormulas[i];
       if (deckCycleCount - mCard.masteredAtCycle >= 5) {
@@ -553,40 +457,48 @@
         masteredFormulas.splice(i, 1);
       }
     }
+    
     activeFormulas.forEach(card => {
       if (card.correctCount >= 3 && (deckCycleCount - card.lastUpdatedCycle >= 5)) {
         card.correctCount -= 1;
         card.lastUpdatedCycle = deckCycleCount;
       }
     });
+
+    if (activeFormulas.length === 0 && masteredFormulas.length > 0) {
+      let minCycles = 5;
+      masteredFormulas.forEach(f => {
+        let left = 5 - (deckCycleCount - f.masteredAtCycle);
+        if (left < minCycles) minCycles = left;
+      });
+      
+      if (minCycles > 0) {
+        deckCycleCount += (minCycles - 1);
+        alert(`💡 현재 학습할 카드가 없어서 시간을 ${minCycles}턴 앞당겼어!\n다시 복습을 시작해 보자!`);
+        return resetDeck(); 
+      }
+    }
+
     shuffledDeck = shuffle([...activeFormulas]);
     currentIndex = 0;
     saveData();
   }
 
-  // ★ 수식 가로/세로 자동 크기 조절 함수 ★
   function renderAdjustedFormula(container, content) {
-    // 1. 기본 크기(26px)로 먼저 렌더링
     container.style.fontSize = "26px";
     katex.render(content, container, { displayMode: true, throwOnError: false });
 
-    // 2. 카드 내 제한 크기 (패딩 감안)
     const maxWidth = 310; 
-    const maxHeight = 190;
+    const maxHeight = 230; 
 
-    // 3. 렌더링된 수식의 실제 너비와 높이 가져오기
     const currentWidth = container.scrollWidth;
     const currentHeight = container.scrollHeight;
 
-    // 4. 가로 또는 세로가 제한 크기를 넘어가면 비율 계산
     if (currentWidth > maxWidth || currentHeight > maxHeight) {
       let widthRatio = maxWidth / currentWidth;
       let heightRatio = maxHeight / currentHeight;
-      
-      // 더 작게 쪼그라들어야 하는(더 빡빡한) 쪽 비율 선택
       let finalRatio = Math.min(widthRatio, heightRatio);
 
-      // 5. 최소 12px 크기 제한 두기
       const newSize = Math.max(12, Math.floor(26 * finalRatio));
       container.style.fontSize = newSize + "px";
     }
@@ -599,8 +511,13 @@
     
     setTimeout(() => {
       if (shuffledDeck.length === 0) {
-        front.textContent = "🏆 완벽해!";
-        formulaDisplay.textContent = "모든 공식을 마스터했어!";
+        if(activeFormulas.length === 0 && masteredFormulas.length === 0) {
+          front.textContent = "텅~ 비었어!";
+          formulaDisplay.textContent = "새로운 공식을 추가해 봐!";
+        } else {
+          front.textContent = "🏆 완벽해!";
+          formulaDisplay.textContent = "모든 공식을 마스터했어!";
+        }
         formulaDisplay.style.fontSize = "22px";
         
         progressText.textContent = "0 / 0";
@@ -612,10 +529,7 @@
       }
 
       const currentCard = shuffledDeck[currentIndex];
-      
       front.textContent = currentCard.name;
-      
-      // 가로 세로 모두 감안해서 렌더링
       renderAdjustedFormula(formulaDisplay, currentCard.content);
       
       btnCorrect.textContent = `✔ 정답 (${currentCard.correctCount}/5)`;
@@ -656,14 +570,14 @@
         activeFormulas = activeFormulas.filter(c => c !== currentCard);
         masteredFormulas.push(currentCard);
         shuffledDeck.splice(currentIndex, 1);
-        saveData();
         
         if (shuffledDeck.length === 0) {
-          if (activeFormulas.length === 0) { updateUI(); return; }
-          else { resetDeck(); }
+          resetDeck();
         } else {
           if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
         }
+        
+        saveData();
         updateUI();
       }, 500);
 
@@ -697,6 +611,7 @@
     currentMode = mode;
     const modalTitle = document.getElementById('modal-title');
     const submitBtn = document.getElementById('modal-submit-btn');
+    const deleteBtn = document.getElementById('modal-delete-btn');
     const nameInput = document.getElementById('new-name');
     const contentInput = document.getElementById('new-content');
 
@@ -704,12 +619,14 @@
       if (shuffledDeck.length === 0) return;
       modalTitle.textContent = "✏️ 공식 편집하기";
       submitBtn.textContent = "저장하기";
+      deleteBtn.style.display = 'block';
       const currentCard = shuffledDeck[currentIndex];
       nameInput.value = currentCard.name;
       contentInput.value = currentCard.content;
     } else {
       modalTitle.textContent = "새 공식 추가하기";
       submitBtn.textContent = "추가하기";
+      deleteBtn.style.display = 'none';
       nameInput.value = "";
       contentInput.value = "";
     }
@@ -746,6 +663,28 @@
         shuffledDeck.push(newCard);
       }
     }
+    saveData();
+    closeFormModal();
+    updateUI();
+  }
+
+  function deleteFormula() {
+    if (!confirm("정말 이 공식을 삭제할까? 한 번 지우면 복구할 수 없어!")) {
+      return;
+    }
+
+    const currentCard = shuffledDeck[currentIndex];
+    activeFormulas = activeFormulas.filter(c => c !== currentCard);
+    shuffledDeck.splice(currentIndex, 1);
+    
+    if (shuffledDeck.length === 0) {
+      resetDeck();
+    } else {
+      if (currentIndex >= shuffledDeck.length) {
+        currentIndex = 0;
+      }
+    }
+    
     saveData();
     closeFormModal();
     updateUI();
