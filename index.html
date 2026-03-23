@@ -29,8 +29,20 @@
     overflow: hidden;
   }
   
-  .top-right { position: absolute; top: 20px; right: 20px; }
-  .top-left { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; }
+  .top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  .top-left {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap; /* 모바일에서 버튼이 많아지면 줄바꿈 되도록 설정 */
+    max-width: 70%;
+  }
 
   .btn-top {
     padding: 10px 12px;
@@ -43,12 +55,21 @@
     transition: transform 0.2s, background-color 0.2s;
     font-size: 13px;
   }
-  .btn-top:hover { transform: translateY(-2px); }
+  .btn-top:hover {
+    transform: translateY(-2px);
+  }
   .btn-master { background-color: #f1c40f; }
   .btn-backup { background-color: #ecf0f1; }
   .btn-restore { background-color: #ecf0f1; }
+  /* ★ 전체 목록 버튼 스타일 추가 ★ */
+  .btn-all { background-color: #3498db; color: white; }
+  .btn-all:hover { background-color: #2980b9; }
 
-  h1 { color: #333; margin-bottom: 20px; font-size: 28px; }
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 28px;
+  }
   
   .card-container {
     perspective: 1000px;
@@ -75,7 +96,9 @@
     transform-style: preserve-3d;
     cursor: pointer;
   }
-  .card.flipped { transform: rotateY(180deg); }
+  .card.flipped {
+    transform: rotateY(180deg);
+  }
   .card-face {
     position: absolute;
     width: 100%;
@@ -139,7 +162,11 @@
     width: 0%;
     transition: width 0.3s ease;
   }
-  .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
   .btn-nav {
     padding: 12px 20px;
     font-size: 15px;
@@ -152,9 +179,15 @@
     transition: all 0.2s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  .btn-nav:hover { background-color: #2c3e50; }
-  .btn-correct { background-color: #27ae60; }
-  .btn-correct:hover { background-color: #219653; }
+  .btn-nav:hover {
+    background-color: #2c3e50;
+  }
+  .btn-correct {
+    background-color: #27ae60;
+  }
+  .btn-correct:hover {
+    background-color: #219653;
+  }
   
   .btn-nav:disabled, .btn-correct:disabled {
     background-color: #bdc3c7 !important;
@@ -182,7 +215,9 @@
     justify-content: center;
     z-index: 100;
   }
-  .fab:hover { transform: scale(1.1); }
+  .fab:hover {
+    transform: scale(1.1);
+  }
 
   .modal-overlay {
     position: fixed;
@@ -204,35 +239,101 @@
     gap: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
-  .modal-content h2 { margin: 0; font-size: 20px; color: #333; text-align: center; }
+  .modal-content h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+    text-align: center;
+  }
   .modal-content input, .modal-content textarea {
-    padding: 10px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-family: inherit; resize: vertical;
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
   }
-  .modal-content input:focus, .modal-content textarea:focus { border-color: #2ecc71; }
+  .modal-content input:focus, .modal-content textarea:focus {
+    border-color: #2ecc71;
+  }
   
-  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
-  .toolbar button {
-    padding: 6px 10px; font-size: 12px; background-color: #ecf0f1; border: 1px solid #bdc3c7; border-radius: 6px; cursor: pointer; color: #2c3e50; font-weight: bold; transition: background-color 0.2s;
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
   }
-  .toolbar button:hover { background-color: #d5dbdb; }
+  .toolbar button {
+    padding: 6px 10px;
+    font-size: 12px;
+    background-color: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #2c3e50;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+  .toolbar button:hover {
+    background-color: #d5dbdb;
+  }
 
   .preview-box {
-    min-height: 50px; background-color: #f8f9f9; border: 1px dashed #bdc3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 10px; overflow-x: auto; color: #7f8c8d; font-size: 14px;
+    min-height: 50px;
+    background-color: #f8f9f9;
+    border: 1px dashed #bdc3c7;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow-x: auto;
+    color: #7f8c8d;
+    font-size: 14px;
   }
 
-  .modal-buttons { display: flex; gap: 10px; margin-top: 5px; }
-  .modal-buttons button { flex: 1; padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+  }
+  .modal-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
   .btn-cancel { background-color: #bdc3c7; color: white; }
   .btn-submit { background-color: #2ecc71; color: white; }
   .btn-delete { background-color: #e74c3c; color: white; display: none; }
   .btn-delete:hover { background-color: #c0392b; }
 
-  .mastered-list { overflow-y: auto; max-height: 300px; margin-top: 10px; }
+  .mastered-list {
+    overflow-y: auto;
+    max-height: 300px;
+    margin-top: 10px;
+  }
   
   .mastered-item {
-    padding: 12px; background-color: #f9f9f9; border-bottom: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; font-weight: bold; color: #f39c12; display: flex; justify-content: space-between; cursor: pointer; transition: background-color 0.2s;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #f39c12;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
-  .mastered-item:hover { background-color: #eef2f5; }
+  .mastered-item:hover {
+    background-color: #eef2f5;
+  }
   
   #view-modal { z-index: 300; }
   #file-input { display: none; }
@@ -241,6 +342,7 @@
 <body>
 
 <div class="top-left">
+  <button class="btn-top btn-all" onclick="openAllListModal()">📚 전체 목록</button>
   <button class="btn-top btn-backup" onclick="downloadBackup()">💾 백업</button>
   <button class="btn-top btn-restore" onclick="triggerUpload()">📂 불러오기</button>
   <input type="file" id="file-input" accept=".json" onchange="handleFileUpload(event)">
@@ -312,6 +414,17 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="all-list-modal">
+  <div class="modal-content">
+    <h2>📚 전체 공식 목록</h2>
+    <p style="margin:0; font-size:12px; color:#7f8c8d; text-align:center;">총 <span id="all-count">0</span>개의 공식이 있어!</p>
+    <div id="all-list" class="mastered-list"></div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" style="width: 100%;" onclick="closeAllListModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="view-modal">
   <div class="modal-content" style="align-items: center;">
     <h2 id="view-name" style="color: #2c3e50;">공식 이름</h2>
@@ -347,7 +460,6 @@
   const btnCorrect = document.getElementById('btn-correct');
   const btnNext = document.getElementById('btn-next');
 
-  // ★ saveData에 현재 진행 중인 덱(shuffledDeck)과 순서(currentIndex) 추가 ★
   function saveData() {
     const data = {
       activeFormulas: activeFormulas,
@@ -371,7 +483,6 @@
         }));
         masteredFormulas = data.masteredFormulas;
         
-        // ★ 저장된 진행상황이 있으면 복구 ★
         if (data.shuffledDeck && data.shuffledDeck.length > 0) {
           shuffledDeck = data.shuffledDeck;
           currentIndex = data.currentIndex || 0;
@@ -396,7 +507,6 @@
   }
 
   function downloadBackup() {
-    // 백업 파일에는 덱의 현재 진행 상황을 빼고 핵심 데이터만 저장!
     const data = { 
       activeFormulas: activeFormulas, 
       masteredFormulas: masteredFormulas, 
@@ -428,7 +538,7 @@
           }));
           masteredFormulas = data.masteredFormulas;
           
-          resetDeck(); // 백업을 불러왔을 때는 덱을 새로고침함
+          resetDeck(); 
           updateUI();
           alert("데이터를 성공적으로 불러왔어!");
         } else { alert("파일 형식이 맞지 않아!"); }
@@ -618,7 +728,7 @@
   function prevCard() {
     if (shuffledDeck.length === 0) return;
     currentIndex = (currentIndex === 0) ? shuffledDeck.length - 1 : currentIndex - 1;
-    saveData(); // 진행 위치 변경 후 저장
+    saveData();
     updateUI();
   }
 
@@ -628,7 +738,7 @@
       resetDeck();
     } else {
       currentIndex++;
-      saveData(); // 진행 위치 변경 후 저장
+      saveData(); 
     }
     updateUI();
   }
@@ -725,10 +835,10 @@
     if (masteredFormulas.length === 0) {
       listContainer.innerHTML = '<p style="text-align:center; color:#7f8c8d; margin-top:20px;">아직 마스터한 공식이 없어.<br>5번 맞추면 여기에 추가될 거야!</p>';
     } else {
-      masteredFormulas.forEach((f, index) => {
+      masteredFormulas.forEach(f => {
         const item = document.createElement('div');
         item.className = 'mastered-item';
-        item.onclick = () => viewMasteredFormula(index);
+        item.onclick = () => viewAnyFormula(f);
         
         const cyclesLeft = 5 - (deckCycleCount - f.masteredAtCycle);
         item.innerHTML = `<span>${f.name}</span> <span style="font-size:12px; font-weight:normal;">복습까지 ${cyclesLeft}턴 남음 ⭐</span>`;
@@ -742,8 +852,39 @@
     document.getElementById('mastered-modal').style.display = 'none';
   }
 
-  function viewMasteredFormula(index) {
-    const formula = masteredFormulas[index];
+  // ★ 전체 목록 열기 함수 ★
+  function openAllListModal() {
+    const listContainer = document.getElementById('all-list');
+    listContainer.innerHTML = '';
+    
+    // 학습 중인 공식과 마스터한 공식을 모두 합침
+    const allCards = [...activeFormulas, ...masteredFormulas];
+    document.getElementById('all-count').textContent = allCards.length;
+    
+    if (allCards.length === 0) {
+      listContainer.innerHTML = '<p style="text-align:center; color:#7f8c8d; margin-top:20px;">등록된 공식이 하나도 없어!</p>';
+    } else {
+      allCards.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'mastered-item';
+        item.onclick = () => viewAnyFormula(f);
+        
+        // 카드의 상태를 확인해서 텍스트 다르게 표시
+        let statusText = masteredFormulas.includes(f) ? "🏆 마스터" : `💪 학습중 (${f.correctCount}/5)`;
+        
+        item.innerHTML = `<span>${f.name}</span> <span style="font-size:12px; font-weight:normal; color:#7f8c8d;">${statusText}</span>`;
+        listContainer.appendChild(item);
+      });
+    }
+    document.getElementById('all-list-modal').style.display = 'flex';
+  }
+
+  function closeAllListModal() {
+    document.getElementById('all-list-modal').style.display = 'none';
+  }
+
+  // ★ 개별 공식 보기 통합 함수 (마스터 목록, 전체 목록 공용) ★
+  function viewAnyFormula(formula) {
     document.getElementById('view-name').textContent = formula.name;
     const viewContent = document.getElementById('view-content');
     
@@ -785,10 +926,8 @@
     updatePreview();
   }
 
-  // 앱 시작 시 데이터 불러오기 및 진행 상황 복구
   loadSavedData();
   
-  // 저장된 덱 진행 상황이 없을 경우에만 처음부터 섞기 실행
   if (shuffledDeck.length === 0) {
     resetDeck();
   }
