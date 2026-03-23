@@ -21,7 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
 <style>
-  /* ★ 앱 전체(바디, 버튼, 입력창)에 나눔고딕 일괄 적용 ★ */
+  /* 앱 전체(바디, 버튼, 입력창)에 나눔고딕 일괄 적용 */
   body, button, input, textarea {
     font-family: 'Nanum Gothic', sans-serif;
   }
@@ -196,6 +196,8 @@
     flex-direction: column-reverse; 
     align-items: flex-end;
     gap: 15px;
+    /* ★ 수정: 컨테이너 빈 공간 클릭 통과 (다음 버튼 눌리게 함) ★ */
+    pointer-events: none; 
   }
 
   .fab-menu {
@@ -207,11 +209,13 @@
     visibility: hidden;
     transform: translateY(20px);
     transition: all 0.3s ease;
+    pointer-events: none;
   }
   .fab-menu.open {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .fab-item {
@@ -225,6 +229,8 @@
     font-size: 14px;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
+    /* ★ 수정: 버튼 자체는 클릭 허용 ★ */
+    pointer-events: auto; 
   }
   .fab-item:hover {
     transform: scale(1.05);
@@ -245,6 +251,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* ★ 수정: 메인 버튼 클릭 허용 ★ */
+    pointer-events: auto; 
   }
   .fab.open {
     transform: rotate(45deg);
@@ -259,6 +267,7 @@
     align-items: center;
     justify-content: center;
     z-index: 200;
+    pointer-events: auto;
   }
   .modal-content {
     background-color: white;
@@ -442,6 +451,7 @@
     const container = document.querySelector('.fab-container');
     const menu = document.getElementById('fab-menu');
     const fab = document.getElementById('main-fab');
+    // 빈 공간을 누르면 닫히도록 예외 처리
     if (!container.contains(e.target) && menu.classList.contains('open')) {
       menu.classList.remove('open');
       fab.classList.remove('open');
