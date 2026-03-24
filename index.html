@@ -179,6 +179,7 @@
   .btn-correct { background-color: #27ae60; }
   .btn-correct:hover { background-color: #219653; }
   
+  /* 비활성화 버튼 디자인 */
   .btn-nav:disabled, .btn-correct:disabled {
     background-color: #bdc3c7 !important;
     cursor: not-allowed;
@@ -340,7 +341,7 @@
 </div>
 
 <div class="controls">
-  <button class="btn-nav" onclick="prevCard()">◀ 이전</button>
+  <button class="btn-nav" id="btn-prev" onclick="prevCard()">◀ 이전</button>
   <button class="btn-nav btn-correct" id="btn-correct" onclick="markCorrect()" disabled>✔ 정답 (0/5)</button>
   <button class="btn-nav" id="btn-next" onclick="nextCard()" disabled>다음 ▶</button>
 </div>
@@ -433,6 +434,9 @@
   const formulaDisplay = document.getElementById('formula-display');
   const progressText = document.getElementById('progress-text');
   const progressBarFill = document.getElementById('progress-bar-fill');
+  
+  // 버튼 요소 가져오기
+  const btnPrev = document.getElementById('btn-prev');
   const btnCorrect = document.getElementById('btn-correct');
   const btnNext = document.getElementById('btn-next');
 
@@ -464,7 +468,6 @@
     localStorage.setItem('formulaApp_data', JSON.stringify(data));
   }
 
-  // ★ 치명적이었던 복제 버그 해결 파트 ★
   function loadSavedData() {
     const saved = localStorage.getItem('formulaApp_data');
     if (saved) {
@@ -479,10 +482,9 @@
         masteredFormulas = data.masteredFormulas;
         
         if (data.shuffledDeck && data.shuffledDeck.length > 0) {
-          // 저장된 덱을 불러올 때, 원본(activeFormulas)과 이름으로 비교하여 '진짜 원본'을 다시 연결해 줌!
           shuffledDeck = data.shuffledDeck.map(savedCard =>
             activeFormulas.find(f => f.name === savedCard.name)
-          ).filter(Boolean); // 혹시라도 못 찾은 카드는 걸러냄
+          ).filter(Boolean);
           
           currentIndex = data.currentIndex || 0;
         } else {
@@ -658,6 +660,8 @@
         progressText.textContent = "0 / 0";
         progressBarFill.style.width = "100%";
         btnCorrect.textContent = "✔ 정답 (0/5)";
+        
+        btnPrev.disabled = true;
         btnCorrect.disabled = true;
         btnNext.disabled = true;
         return;
@@ -675,6 +679,10 @@
       
       const progressPercent = (currentNum / total) * 100;
       progressBarFill.style.width = `${progressPercent}%`;
+
+      // 첫 번째 카드면 이전 버튼 비활성화 (버그 방지)
+      btnPrev.disabled = (currentIndex === 0);
+
     }, 150);
   }
 
@@ -724,9 +732,10 @@
     }
   }
 
+  // 이전 카드 로직 변경: 0번 인덱스일 땐 뒤로 넘어가지 않음
   function prevCard() {
-    if (shuffledDeck.length === 0) return;
-    currentIndex = (currentIndex === 0) ? shuffledDeck.length - 1 : currentIndex - 1;
+    if (shuffledDeck.length === 0 || currentIndex === 0) return;
+    currentIndex--;
     saveData();
     updateUI();
   }
