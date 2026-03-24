@@ -21,7 +21,6 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
 <style>
-  /* 앱 전체(바디, 버튼, 입력창)에 나눔고딕 일괄 적용 */
   body, button, input, textarea {
     font-family: 'Nanum Gothic', sans-serif;
   }
@@ -196,7 +195,6 @@
     flex-direction: column-reverse; 
     align-items: flex-end;
     gap: 15px;
-    /* ★ 수정: 컨테이너 빈 공간 클릭 통과 (다음 버튼 눌리게 함) ★ */
     pointer-events: none; 
   }
 
@@ -229,7 +227,6 @@
     font-size: 14px;
     cursor: pointer;
     transition: transform 0.2s, background-color 0.2s;
-    /* ★ 수정: 버튼 자체는 클릭 허용 ★ */
     pointer-events: auto; 
   }
   .fab-item:hover {
@@ -251,7 +248,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* ★ 수정: 메인 버튼 클릭 허용 ★ */
     pointer-events: auto; 
   }
   .fab.open {
@@ -451,7 +447,6 @@
     const container = document.querySelector('.fab-container');
     const menu = document.getElementById('fab-menu');
     const fab = document.getElementById('main-fab');
-    // 빈 공간을 누르면 닫히도록 예외 처리
     if (!container.contains(e.target) && menu.classList.contains('open')) {
       menu.classList.remove('open');
       fab.classList.remove('open');
@@ -469,12 +464,14 @@
     localStorage.setItem('formulaApp_data', JSON.stringify(data));
   }
 
+  // ★ 치명적이었던 복제 버그 해결 파트 ★
   function loadSavedData() {
     const saved = localStorage.getItem('formulaApp_data');
     if (saved) {
       try {
         const data = JSON.parse(saved);
         deckCycleCount = data.deckCycleCount || 0;
+        
         activeFormulas = data.activeFormulas.map(f => ({
           ...f,
           lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount
@@ -482,7 +479,11 @@
         masteredFormulas = data.masteredFormulas;
         
         if (data.shuffledDeck && data.shuffledDeck.length > 0) {
-          shuffledDeck = data.shuffledDeck;
+          // 저장된 덱을 불러올 때, 원본(activeFormulas)과 이름으로 비교하여 '진짜 원본'을 다시 연결해 줌!
+          shuffledDeck = data.shuffledDeck.map(savedCard =>
+            activeFormulas.find(f => f.name === savedCard.name)
+          ).filter(Boolean); // 혹시라도 못 찾은 카드는 걸러냄
+          
           currentIndex = data.currentIndex || 0;
         } else {
           shuffledDeck = [];
