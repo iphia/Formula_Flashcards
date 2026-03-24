@@ -340,7 +340,7 @@
 </div>
 
 <div class="controls">
-  <button class="btn-nav" id="btn-prev" onclick="prevCard()">◀ 이전</button>
+  <button class="btn-nav" onclick="prevCard()">◀ 이전</button>
   <button class="btn-nav btn-correct" id="btn-correct" onclick="markCorrect()" disabled>✔ 정답 (0/5)</button>
   <button class="btn-nav" id="btn-next" onclick="nextCard()" disabled>다음 ▶</button>
 </div>
@@ -435,7 +435,6 @@
   const progressBarFill = document.getElementById('progress-bar-fill');
   const btnCorrect = document.getElementById('btn-correct');
   const btnNext = document.getElementById('btn-next');
-  const btnPrev = document.getElementById('btn-prev'); // ★ 이전 버튼 변수 추가
 
   function toggleFabMenu() {
     const menu = document.getElementById('fab-menu');
@@ -465,6 +464,7 @@
     localStorage.setItem('formulaApp_data', JSON.stringify(data));
   }
 
+  // ★ 치명적이었던 복제 버그 해결 파트 ★
   function loadSavedData() {
     const saved = localStorage.getItem('formulaApp_data');
     if (saved) {
@@ -479,9 +479,10 @@
         masteredFormulas = data.masteredFormulas;
         
         if (data.shuffledDeck && data.shuffledDeck.length > 0) {
+          // 저장된 덱을 불러올 때, 원본(activeFormulas)과 이름으로 비교하여 '진짜 원본'을 다시 연결해 줌!
           shuffledDeck = data.shuffledDeck.map(savedCard =>
             activeFormulas.find(f => f.name === savedCard.name)
-          ).filter(Boolean); 
+          ).filter(Boolean); // 혹시라도 못 찾은 카드는 걸러냄
           
           currentIndex = data.currentIndex || 0;
         } else {
@@ -548,59 +549,28 @@
 
   let pressTimer;
   let isLongPress = false;
-  let isMoved = false;
-  let startX = 0;
-  let startY = 0;
 
-  const handleStart = (e) => {
+  cardContainer.addEventListener('mousedown', startPress);
+  cardContainer.addEventListener('touchstart', startPress, {passive: true});
+  cardContainer.addEventListener('mouseup', endPress);
+  cardContainer.addEventListener('mouseleave', endPress);
+  cardContainer.addEventListener('touchend', endPress);
+  
+  cardContainer.addEventListener('click', (e) => {
+    if (!isLongPress) flipCard();
+  });
+
+  function startPress(e) {
     if (shuffledDeck.length === 0) return;
-    const touch = e.touches ? e.touches[0] : e;
-    startX = touch.clientX;
-    startY = touch.clientY;
-    isMoved = false;
     isLongPress = false;
     pressTimer = setTimeout(() => {
-      if (!isMoved) {
-        isLongPress = true;
-        if (navigator.vibrate) navigator.vibrate(50);
-        openFormModal('edit');
-      }
+      isLongPress = true;
+      if (navigator.vibrate) navigator.vibrate(50);
+      openFormModal('edit');
     }, 600);
-  };
+  }
 
-  const handleMove = (e) => {
-    const touch = e.touches ? e.touches[0] : e;
-    if (Math.abs(startX - touch.clientX) > 10 || Math.abs(startY - touch.clientY) > 10) {
-      isMoved = true;
-      clearTimeout(pressTimer);
-    }
-  };
-
-  const handleEnd = (e) => {
-    clearTimeout(pressTimer);
-    if (shuffledDeck.length === 0) return;
-    
-    if (isMoved) {
-      const touch = e.changedTouches ? e.changedTouches[0] : e;
-      const dx = startX - touch.clientX;
-      const dy = startY - touch.clientY;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0 && !btnNext.disabled) nextCard();
-        else if (dx < 0 && !btnPrev.disabled) prevCard(); // ★ 스와이프 이전 넘기기도 첫 카드면 방어
-      }
-    } else {
-      if (!isLongPress) {
-        flipCard();
-      }
-    }
-  };
-
-  cardContainer.addEventListener('mousedown', handleStart);
-  cardContainer.addEventListener('touchstart', handleStart, {passive: true});
-  window.addEventListener('mousemove', handleMove);
-  window.addEventListener('touchmove', handleMove, {passive: true});
-  window.addEventListener('mouseup', handleEnd);
-  window.addEventListener('touchend', handleEnd);
+  function endPress(e) { clearTimeout(pressTimer); }
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -690,7 +660,6 @@
         btnCorrect.textContent = "✔ 정답 (0/5)";
         btnCorrect.disabled = true;
         btnNext.disabled = true;
-        btnPrev.disabled = true; // 빈 덱일 땐 항상 비활성화
         return;
       }
 
@@ -706,9 +675,6 @@
       
       const progressPercent = (currentNum / total) * 100;
       progressBarFill.style.width = `${progressPercent}%`;
-
-      // ★ 덱의 첫 번째 카드일 때는 이전 버튼 비활성화 (꼼수 방지) ★
-      btnPrev.disabled = (currentIndex === 0);
     }, 150);
   }
 
@@ -758,10 +724,9 @@
     }
   }
 
-  // ★ 이전 버튼: 꼼수 방지 (0번째 인덱스면 동작 안 함) ★
   function prevCard() {
-    if (shuffledDeck.length === 0 || currentIndex === 0) return;
-    currentIndex--; 
+    if (shuffledDeck.length === 0) return;
+    currentIndex = (currentIndex === 0) ? shuffledDeck.length - 1 : currentIndex - 1;
     saveData();
     updateUI();
   }
