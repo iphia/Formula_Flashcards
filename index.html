@@ -176,11 +176,16 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
   .btn-nav:hover { background-color: #2c3e50; }
+  
   .btn-correct { background-color: #27ae60; }
   .btn-correct:hover { background-color: #219653; }
+
+  /* 취소 버튼 디자인 추가 */
+  .btn-undo { background-color: #e67e22; }
+  .btn-undo:hover { background-color: #d35400; }
   
   /* 비활성화 버튼 디자인 */
-  .btn-nav:disabled, .btn-correct:disabled {
+  .btn-nav:disabled, .btn-correct:disabled, .btn-undo:disabled {
     background-color: #bdc3c7 !important;
     cursor: not-allowed;
     box-shadow: none;
@@ -308,6 +313,7 @@
   .mastered-item:hover { background-color: #eef2f5; }
   
   #view-modal { z-index: 300; }
+  #form-modal { z-index: 400; }
   #file-input { display: none; }
 </style>
 </head>
@@ -407,7 +413,8 @@
     <h2 id="view-name" style="color: #2c3e50;">공식 이름</h2>
     <div id="view-content" style="margin: 20px 0; font-size: 22px; color: #333333;">수식 내용</div>
     <div class="modal-buttons" style="width: 100%;">
-      <button class="btn-cancel" style="width: 100%;" onclick="closeViewModal()">닫기</button>
+      <button class="btn-cancel" style="flex: 1;" onclick="closeViewModal()">닫기</button>
+      <button class="btn-submit" style="flex: 1;" onclick="editViewedFormula()">편집</button>
     </div>
   </div>
 </div>
@@ -427,6 +434,10 @@
   let shuffledDeck = [];
   let currentIndex = 0;
 
+  let currentEditTarget = null;
+  let currentViewTarget = null;
+  let currentMode = 'add';
+
   const cardContainer = document.getElementById('card-container');
   const card = document.getElementById('flashcard');
   const front = document.getElementById('card-front');
@@ -435,7 +446,6 @@
   const progressText = document.getElementById('progress-text');
   const progressBarFill = document.getElementById('progress-bar-fill');
   
-  // 버튼 요소 가져오기
   const btnPrev = document.getElementById('btn-prev');
   const btnCorrect = document.getElementById('btn-correct');
   const btnNext = document.getElementById('btn-next');
@@ -477,7 +487,8 @@
         
         activeFormulas = data.activeFormulas.map(f => ({
           ...f,
-          lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount
+          lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount,
+          isCorrectInCurrentCycle: f.isCorrectInCurrentCycle || false // 턴 내 정답 여부
         }));
         masteredFormulas = data.masteredFormulas;
         
@@ -500,7 +511,9 @@
   }
 
   function initDefaultData() {
-    activeFormulas = initialData.map(f => ({ ...f, correctCount: 0, lastUpdatedCycle: 0 }));
+    activeFormulas = initialData.map(f => ({ 
+      ...f, correctCount: 0, lastUpdatedCycle: 0, isCorrectInCurrentCycle: false 
+    }));
     masteredFormulas = [];
     deckCycleCount = 0;
     shuffledDeck = [];
@@ -535,7 +548,8 @@
           deckCycleCount = data.deckCycleCount || 0;
           activeFormulas = data.activeFormulas.map(f => ({
             ...f,
-            lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount
+            lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount,
+            isCorrectInCurrentCycle: false
           }));
           masteredFormulas = data.masteredFormulas;
           
@@ -568,7 +582,7 @@
     pressTimer = setTimeout(() => {
       isLongPress = true;
       if (navigator.vibrate) navigator.vibrate(50);
-      openFormModal('edit');
+      openFormModal('edit'); 
     }, 600);
   }
 
@@ -596,6 +610,7 @@
     }
     
     activeFormulas.forEach(card => {
+      card.isCorrectInCurrentCycle = false; // 새로운 턴 시작시 정답기록 초기화
       if (card.correctCount >= 3 && (deckCycleCount - card.lastUpdatedCycle >= 5)) {
         card.correctCount -= 1;
         card.lastUpdatedCycle = deckCycleCount;
@@ -641,10 +656,13 @@
     }
   }
 
-  function updateUI() {
-    card.classList.remove('flipped');
-    btnCorrect.disabled = true;
-    btnNext.disabled = true;
+  // keepFlipped 매개변수 추가 (취소버튼 눌렀을 때 카드가 닫히지 않게 하기 위함)
+  function updateUI(keepFlipped = false) {
+    if (!keepFlipped) {
+      card.classList.remove('flipped');
+      btnCorrect.disabled = true;
+      btnNext.disabled = true;
+    }
     
     setTimeout(() => {
       if (shuffledDeck.length === 0) {
@@ -671,7 +689,16 @@
       front.textContent = currentCard.name;
       renderAdjustedFormula(formulaDisplay, currentCard.content);
       
-      btnCorrect.textContent = `✔ 정답 (${currentCard.correctCount}/5)`;
+      // 이번 턴에 정답 처리했었는지에 따라 버튼 상태 변경
+      if (currentCard.isCorrectInCurrentCycle) {
+        btnCorrect.textContent = `❌ 정답 취소 (${currentCard.correctCount}/5)`;
+        btnCorrect.classList.add('btn-undo');
+        btnCorrect.classList.remove('btn-correct');
+      } else {
+        btnCorrect.textContent = `✔ 정답 (${currentCard.correctCount}/5)`;
+        btnCorrect.classList.add('btn-correct');
+        btnCorrect.classList.remove('btn-undo');
+      }
       
       const total = shuffledDeck.length;
       const currentNum = currentIndex + 1;
@@ -680,8 +707,12 @@
       const progressPercent = (currentNum / total) * 100;
       progressBarFill.style.width = `${progressPercent}%`;
 
-      // 첫 번째 카드면 이전 버튼 비활성화 (버그 방지)
       btnPrev.disabled = (currentIndex === 0);
+
+      if (keepFlipped) {
+        btnCorrect.disabled = false;
+        btnNext.disabled = false;
+      }
 
     }, 150);
   }
@@ -701,38 +732,49 @@
     if (shuffledDeck.length === 0) return;
     
     let currentCard = shuffledDeck[currentIndex];
-    currentCard.correctCount += 1;
-    currentCard.lastUpdatedCycle = deckCycleCount;
 
-    if (currentCard.correctCount >= 5) {
-      cardContainer.classList.add('fly-away');
-      currentCard.masteredAtCycle = deckCycleCount;
-      
-      setTimeout(() => {
-        cardContainer.classList.remove('fly-away');
-        activeFormulas = activeFormulas.filter(c => c !== currentCard);
-        masteredFormulas.push(currentCard);
-        shuffledDeck.splice(currentIndex, 1);
-        
-        if (shuffledDeck.length === 0) {
-          resetDeck();
-        } else {
-          if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
-        }
-        
-        saveData();
-        updateUI();
-      }, 500);
-
-    } else {
-      currentIndex++;
-      if (currentIndex >= shuffledDeck.length) { resetDeck(); }
+    // 이미 눌렀던 경우 -> 토글 취소
+    if (currentCard.isCorrectInCurrentCycle) {
+      currentCard.correctCount -= 1;
+      currentCard.isCorrectInCurrentCycle = false;
       saveData();
-      updateUI();
+      updateUI(true); // 카드가 다시 안 뒤집히도록 유지
+    } 
+    // 처음 누르는 경우 -> 정답 처리
+    else {
+      currentCard.correctCount += 1;
+      currentCard.lastUpdatedCycle = deckCycleCount;
+      currentCard.isCorrectInCurrentCycle = true;
+
+      if (currentCard.correctCount >= 5) {
+        cardContainer.classList.add('fly-away');
+        currentCard.masteredAtCycle = deckCycleCount;
+        
+        setTimeout(() => {
+          cardContainer.classList.remove('fly-away');
+          activeFormulas = activeFormulas.filter(c => c !== currentCard);
+          masteredFormulas.push(currentCard);
+          shuffledDeck.splice(currentIndex, 1);
+          
+          if (shuffledDeck.length === 0) {
+            resetDeck();
+          } else {
+            if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
+          }
+          
+          saveData();
+          updateUI(); // 새 카드 나오니까 기본값(닫힘)
+        }, 500);
+
+      } else {
+        currentIndex++;
+        if (currentIndex >= shuffledDeck.length) { resetDeck(); }
+        saveData();
+        updateUI(); // 다음 카드로 넘어가며 닫힘
+      }
     }
   }
 
-  // 이전 카드 로직 변경: 0번 인덱스일 땐 뒤로 넘어가지 않음
   function prevCard() {
     if (shuffledDeck.length === 0 || currentIndex === 0) return;
     currentIndex--;
@@ -751,24 +793,22 @@
     updateUI();
   }
 
-  let currentMode = 'add';
-
-  function openFormModal(mode) {
+  function openFormModal(mode, target = null) {
     currentMode = mode;
+    currentEditTarget = target || (shuffledDeck.length > 0 ? shuffledDeck[currentIndex] : null);
+
     const modalTitle = document.getElementById('modal-title');
     const submitBtn = document.getElementById('modal-submit-btn');
     const deleteBtn = document.getElementById('modal-delete-btn');
     const nameInput = document.getElementById('new-name');
     const contentInput = document.getElementById('new-content');
 
-    if (mode === 'edit') {
-      if (shuffledDeck.length === 0) return;
+    if (mode === 'edit' && currentEditTarget) {
       modalTitle.textContent = "✏️ 공식 편집하기";
       submitBtn.textContent = "저장하기";
       deleteBtn.style.display = 'block';
-      const currentCard = shuffledDeck[currentIndex];
-      nameInput.value = currentCard.name;
-      contentInput.value = currentCard.content;
+      nameInput.value = currentEditTarget.name;
+      contentInput.value = currentEditTarget.content;
     } else {
       modalTitle.textContent = "새 공식 추가하기";
       submitBtn.textContent = "추가하기";
@@ -786,22 +826,19 @@
   }
 
   function submitFormula() {
-    const nameInput = document.getElementById('new-name');
-    const contentInput = document.getElementById('new-content');
-    const name = nameInput.value.trim();
-    const content = contentInput.value.trim();
+    const name = document.getElementById('new-name').value.trim();
+    const content = document.getElementById('new-content').value.trim();
 
     if (name === "" || content === "") {
       alert("공식 이름과 내용을 모두 입력해 줘!");
       return;
     }
 
-    if (currentMode === 'edit') {
-      let currentCard = shuffledDeck[currentIndex];
-      currentCard.name = name;
-      currentCard.content = content;
+    if (currentMode === 'edit' && currentEditTarget) {
+      currentEditTarget.name = name;
+      currentEditTarget.content = content;
     } else {
-      const newCard = { name: name, content: content, correctCount: 0, lastUpdatedCycle: deckCycleCount };
+      const newCard = { name: name, content: content, correctCount: 0, lastUpdatedCycle: deckCycleCount, isCorrectInCurrentCycle: false };
       activeFormulas.push(newCard);
       if (shuffledDeck.length === 0) {
         resetDeck();
@@ -812,6 +849,9 @@
     saveData();
     closeFormModal();
     updateUI();
+
+    if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
+    if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
   }
 
   function deleteFormula() {
@@ -819,21 +859,31 @@
       return;
     }
 
-    const currentCard = shuffledDeck[currentIndex];
-    activeFormulas = activeFormulas.filter(c => c !== currentCard);
-    shuffledDeck.splice(currentIndex, 1);
-    
-    if (shuffledDeck.length === 0) {
-      resetDeck();
-    } else {
-      if (currentIndex >= shuffledDeck.length) {
-        currentIndex = 0;
+    if (currentEditTarget) {
+      activeFormulas = activeFormulas.filter(c => c !== currentEditTarget);
+      masteredFormulas = masteredFormulas.filter(c => c !== currentEditTarget);
+      
+      const deckIdx = shuffledDeck.indexOf(currentEditTarget);
+      if (deckIdx > -1) {
+        shuffledDeck.splice(deckIdx, 1);
+        if (deckIdx === currentIndex) {
+          if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
+        } else if (deckIdx < currentIndex) {
+          currentIndex--;
+        }
       }
+    }
+    
+    if (shuffledDeck.length === 0 && activeFormulas.length > 0) {
+      resetDeck();
     }
     
     saveData();
     closeFormModal();
     updateUI();
+
+    if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
+    if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
   }
 
   function openMasteredModal() {
@@ -889,6 +939,7 @@
   }
 
   function viewAnyFormula(formula) {
+    currentViewTarget = formula;
     document.getElementById('view-name').textContent = formula.name;
     const viewContent = document.getElementById('view-content');
     
@@ -898,6 +949,11 @@
   
   function closeViewModal() {
     document.getElementById('view-modal').style.display = 'none';
+  }
+
+  function editViewedFormula() {
+    closeViewModal();
+    openFormModal('edit', currentViewTarget);
   }
 
   function updatePreview() {
