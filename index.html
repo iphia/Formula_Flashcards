@@ -436,7 +436,6 @@
   let currentViewTarget = null;
   let currentMode = 'add';
   
-  // 현재 화면에 렌더링된 수식의 원본 내용(불필요한 재렌더링 방지용)
   let currentlyRenderedFormula = null;
 
   const cardContainer = document.getElementById('card-container');
@@ -566,9 +565,15 @@
 
   let pressTimer;
   let isLongPress = false;
+  let startX = null;
+  let startY = null;
 
   cardContainer.addEventListener('mousedown', startPress);
   cardContainer.addEventListener('touchstart', startPress, {passive: true});
+  
+  cardContainer.addEventListener('mousemove', movePress);
+  cardContainer.addEventListener('touchmove', movePress, {passive: true});
+
   cardContainer.addEventListener('mouseup', endPress);
   cardContainer.addEventListener('mouseleave', endPress);
   cardContainer.addEventListener('touchend', endPress);
@@ -580,6 +585,12 @@
   function startPress(e) {
     if (shuffledDeck.length === 0) return;
     isLongPress = false;
+    
+    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    startX = clientX;
+    startY = clientY;
+
     pressTimer = setTimeout(() => {
       isLongPress = true;
       if (navigator.vibrate) navigator.vibrate(50);
@@ -587,7 +598,21 @@
     }, 600);
   }
 
-  function endPress(e) { clearTimeout(pressTimer); }
+  function movePress(e) {
+    if (!startX || !startY) return;
+    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    if (Math.abs(clientX - startX) > 10 || Math.abs(clientY - startY) > 10) {
+      clearTimeout(pressTimer);
+    }
+  }
+
+  function endPress(e) { 
+    clearTimeout(pressTimer); 
+    startX = null;
+    startY = null;
+  }
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -637,9 +662,7 @@
     saveData();
   }
 
-  // 화면 크기에 맞게 공식을 가상으로 측정하고 렌더링하는 함수 (버그 픽스!)
   function renderAdjustedFormula(container, content) {
-    // 1. 화면 밖 보이지 않는 공간에 가상의 측정용 div를 만듦
     let measurer = document.getElementById('formula-measurer');
     if (!measurer) {
       measurer = document.createElement('div');
@@ -652,11 +675,9 @@
       document.body.appendChild(measurer);
     }
 
-    // 2. 가상 공간에 기준 크기(26px)로 수식을 렌더링
     measurer.style.fontSize = "26px";
     katex.render(content, measurer, { displayMode: true, throwOnError: false });
 
-    // 3. 렌더링된 수식의 진짜 픽셀 크기 확인
     const katexHtml = measurer.querySelector('.katex-html');
     const currentWidth = katexHtml ? katexHtml.offsetWidth : measurer.offsetWidth;
     const currentHeight = katexHtml ? katexHtml.offsetHeight : measurer.offsetHeight;
@@ -664,7 +685,6 @@
     const maxWidth = 310; 
     const maxHeight = 230; 
 
-    // 4. 측정된 크기를 바탕으로 비율 계산
     let newSize = 26;
     if (currentWidth > maxWidth || currentHeight > maxHeight) {
       let widthRatio = maxWidth / currentWidth;
@@ -673,7 +693,6 @@
       newSize = Math.max(12, Math.floor(26 * finalRatio));
     }
 
-    // 5. 실제 카드(container)에 계산된 폰트 크기를 적용해서 진짜 렌더링!
     container.style.fontSize = newSize + "px";
     katex.render(content, container, { displayMode: true, throwOnError: false });
   }
@@ -703,14 +722,13 @@
         btnPrev.disabled = true;
         btnCorrect.disabled = true;
         btnNext.disabled = true;
-        currentlyRenderedFormula = null; // 초기화
+        currentlyRenderedFormula = null; 
         return;
       }
 
       const currentCard = shuffledDeck[currentIndex];
       front.textContent = currentCard.name;
       
-      // 이미 렌더링된 수식과 완전히 똑같다면, 다시 그리지 않음 (크기 널뛰기 완벽 차단!)
       if (currentlyRenderedFormula !== currentCard.content) {
         renderAdjustedFormula(formulaDisplay, currentCard.content);
         currentlyRenderedFormula = currentCard.content;
@@ -862,7 +880,6 @@
       currentEditTarget.name = name;
       currentEditTarget.content = content;
       
-      // 수정을 했으니 무조건 새로 그리도록 초기화
       currentlyRenderedFormula = null; 
     } else {
       const newCard = { name: name, content: content, correctCount: 0, lastUpdatedCycle: deckCycleCount, isCorrectInCurrentCycle: false };
@@ -879,6 +896,11 @@
 
     if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
     if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
+
+    // ★ 추가: 상세 보기 창이 열려있었다면 수정한 내용으로 다시 렌더링!
+    if (document.getElementById('view-modal').style.display === 'flex') {
+      viewAnyFormula(currentEditTarget);
+    }
   }
 
   function deleteFormula() {
@@ -905,13 +927,16 @@
       resetDeck();
     }
     
-    currentlyRenderedFormula = null; // 카드 삭제 시에도 초기화
+    currentlyRenderedFormula = null; 
     saveData();
     closeFormModal();
     updateUI();
 
     if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
     if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
+
+    // ★ 추가: 삭제된 경우에는 볼 내용이 없으니 상세 보기 창을 닫아줌!
+    closeViewModal();
   }
 
   function openMasteredModal() {
@@ -921,7 +946,8 @@
     if (masteredFormulas.length === 0) {
       listContainer.innerHTML = '<p style="text-align:center; color:#7f8c8d; margin-top:20px;">아직 마스터한 공식이 없어.<br>5번 맞추면 여기에 추가될 거야!</p>';
     } else {
-      masteredFormulas.forEach((f, index) => {
+      const sortedMastered = [...masteredFormulas].sort((a, b) => a.name.localeCompare(b.name));
+      sortedMastered.forEach((f, index) => {
         const item = document.createElement('div');
         item.className = 'mastered-item';
         item.onclick = () => viewAnyFormula(f);
@@ -943,6 +969,8 @@
     listContainer.innerHTML = '';
     
     const allCards = [...activeFormulas, ...masteredFormulas];
+    allCards.sort((a, b) => a.name.localeCompare(b.name));
+    
     document.getElementById('all-count').textContent = allCards.length;
     
     if (allCards.length === 0) {
@@ -980,7 +1008,7 @@
   }
 
   function editViewedFormula() {
-    closeViewModal();
+    // ★ 삭제된 부분: 여기서 closeViewModal(); 을 지워서 상세 보기 창을 살려둠!
     openFormModal('edit', currentViewTarget);
   }
 
