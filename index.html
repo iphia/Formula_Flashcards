@@ -180,11 +180,9 @@
   .btn-correct { background-color: #27ae60; }
   .btn-correct:hover { background-color: #219653; }
 
-  /* 취소 버튼 디자인 추가 */
   .btn-undo { background-color: #e67e22; }
   .btn-undo:hover { background-color: #d35400; }
   
-  /* 비활성화 버튼 디자인 */
   .btn-nav:disabled, .btn-correct:disabled, .btn-undo:disabled {
     background-color: #bdc3c7 !important;
     cursor: not-allowed;
@@ -437,6 +435,9 @@
   let currentEditTarget = null;
   let currentViewTarget = null;
   let currentMode = 'add';
+  
+  // 현재 화면에 렌더링된 수식의 원본 내용(불필요한 재렌더링 방지용)
+  let currentlyRenderedFormula = null;
 
   const cardContainer = document.getElementById('card-container');
   const card = document.getElementById('flashcard');
@@ -488,7 +489,7 @@
         activeFormulas = data.activeFormulas.map(f => ({
           ...f,
           lastUpdatedCycle: f.lastUpdatedCycle !== undefined ? f.lastUpdatedCycle : deckCycleCount,
-          isCorrectInCurrentCycle: f.isCorrectInCurrentCycle || false // 턴 내 정답 여부
+          isCorrectInCurrentCycle: f.isCorrectInCurrentCycle || false
         }));
         masteredFormulas = data.masteredFormulas;
         
@@ -610,7 +611,7 @@
     }
     
     activeFormulas.forEach(card => {
-      card.isCorrectInCurrentCycle = false; // 새로운 턴 시작시 정답기록 초기화
+      card.isCorrectInCurrentCycle = false;
       if (card.correctCount >= 3 && (deckCycleCount - card.lastUpdatedCycle >= 5)) {
         card.correctCount -= 1;
         card.lastUpdatedCycle = deckCycleCount;
@@ -636,27 +637,47 @@
     saveData();
   }
 
+  // 화면 크기에 맞게 공식을 가상으로 측정하고 렌더링하는 함수 (버그 픽스!)
   function renderAdjustedFormula(container, content) {
-    container.style.fontSize = "26px";
-    katex.render(content, container, { displayMode: true, throwOnError: false });
+    // 1. 화면 밖 보이지 않는 공간에 가상의 측정용 div를 만듦
+    let measurer = document.getElementById('formula-measurer');
+    if (!measurer) {
+      measurer = document.createElement('div');
+      measurer.id = 'formula-measurer';
+      measurer.style.position = 'absolute';
+      measurer.style.visibility = 'hidden';
+      measurer.style.pointerEvents = 'none';
+      measurer.style.width = 'max-content';
+      measurer.style.whiteSpace = 'nowrap';
+      document.body.appendChild(measurer);
+    }
+
+    // 2. 가상 공간에 기준 크기(26px)로 수식을 렌더링
+    measurer.style.fontSize = "26px";
+    katex.render(content, measurer, { displayMode: true, throwOnError: false });
+
+    // 3. 렌더링된 수식의 진짜 픽셀 크기 확인
+    const katexHtml = measurer.querySelector('.katex-html');
+    const currentWidth = katexHtml ? katexHtml.offsetWidth : measurer.offsetWidth;
+    const currentHeight = katexHtml ? katexHtml.offsetHeight : measurer.offsetHeight;
 
     const maxWidth = 310; 
     const maxHeight = 230; 
 
-    const currentWidth = container.scrollWidth;
-    const currentHeight = container.scrollHeight;
-
+    // 4. 측정된 크기를 바탕으로 비율 계산
+    let newSize = 26;
     if (currentWidth > maxWidth || currentHeight > maxHeight) {
       let widthRatio = maxWidth / currentWidth;
       let heightRatio = maxHeight / currentHeight;
       let finalRatio = Math.min(widthRatio, heightRatio);
-
-      const newSize = Math.max(12, Math.floor(26 * finalRatio));
-      container.style.fontSize = newSize + "px";
+      newSize = Math.max(12, Math.floor(26 * finalRatio));
     }
+
+    // 5. 실제 카드(container)에 계산된 폰트 크기를 적용해서 진짜 렌더링!
+    container.style.fontSize = newSize + "px";
+    katex.render(content, container, { displayMode: true, throwOnError: false });
   }
 
-  // keepFlipped 매개변수 추가 (취소버튼 눌렀을 때 카드가 닫히지 않게 하기 위함)
   function updateUI(keepFlipped = false) {
     if (!keepFlipped) {
       card.classList.remove('flipped');
@@ -682,14 +703,19 @@
         btnPrev.disabled = true;
         btnCorrect.disabled = true;
         btnNext.disabled = true;
+        currentlyRenderedFormula = null; // 초기화
         return;
       }
 
       const currentCard = shuffledDeck[currentIndex];
       front.textContent = currentCard.name;
-      renderAdjustedFormula(formulaDisplay, currentCard.content);
       
-      // 이번 턴에 정답 처리했었는지에 따라 버튼 상태 변경
+      // 이미 렌더링된 수식과 완전히 똑같다면, 다시 그리지 않음 (크기 널뛰기 완벽 차단!)
+      if (currentlyRenderedFormula !== currentCard.content) {
+        renderAdjustedFormula(formulaDisplay, currentCard.content);
+        currentlyRenderedFormula = currentCard.content;
+      }
+      
       if (currentCard.isCorrectInCurrentCycle) {
         btnCorrect.textContent = `❌ 정답 취소 (${currentCard.correctCount}/5)`;
         btnCorrect.classList.add('btn-undo');
@@ -733,14 +759,12 @@
     
     let currentCard = shuffledDeck[currentIndex];
 
-    // 이미 눌렀던 경우 -> 토글 취소
     if (currentCard.isCorrectInCurrentCycle) {
       currentCard.correctCount -= 1;
       currentCard.isCorrectInCurrentCycle = false;
       saveData();
-      updateUI(true); // 카드가 다시 안 뒤집히도록 유지
+      updateUI(true); 
     } 
-    // 처음 누르는 경우 -> 정답 처리
     else {
       currentCard.correctCount += 1;
       currentCard.lastUpdatedCycle = deckCycleCount;
@@ -763,14 +787,14 @@
           }
           
           saveData();
-          updateUI(); // 새 카드 나오니까 기본값(닫힘)
+          updateUI(); 
         }, 500);
 
       } else {
         currentIndex++;
         if (currentIndex >= shuffledDeck.length) { resetDeck(); }
         saveData();
-        updateUI(); // 다음 카드로 넘어가며 닫힘
+        updateUI(); 
       }
     }
   }
@@ -837,6 +861,9 @@
     if (currentMode === 'edit' && currentEditTarget) {
       currentEditTarget.name = name;
       currentEditTarget.content = content;
+      
+      // 수정을 했으니 무조건 새로 그리도록 초기화
+      currentlyRenderedFormula = null; 
     } else {
       const newCard = { name: name, content: content, correctCount: 0, lastUpdatedCycle: deckCycleCount, isCorrectInCurrentCycle: false };
       activeFormulas.push(newCard);
@@ -878,6 +905,7 @@
       resetDeck();
     }
     
+    currentlyRenderedFormula = null; // 카드 삭제 시에도 초기화
     saveData();
     closeFormModal();
     updateUI();
