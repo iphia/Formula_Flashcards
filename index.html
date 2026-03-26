@@ -788,6 +788,7 @@
       currentCard.lastUpdatedCycle = deckCycleCount;
       currentCard.isCorrectInCurrentCycle = true;
 
+      // ★ 여기가 버그 수정된 부분이야! 마지막 카드가 마스터될 때도 resetDeck()이 제대로 호출돼.
       if (currentCard.correctCount >= 5) {
         cardContainer.classList.add('fly-away');
         currentCard.masteredAtCycle = deckCycleCount;
@@ -800,8 +801,8 @@
           
           if (shuffledDeck.length === 0) {
             resetDeck();
-          } else {
-            if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
+          } else if (currentIndex >= shuffledDeck.length) {
+            resetDeck(); // 이 코드가 없어서 바로 0번으로 가버리고 턴이 안 넘어갔던 거야!
           }
           
           saveData();
@@ -897,7 +898,6 @@
     if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
     if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
 
-    // ★ 추가: 상세 보기 창이 열려있었다면 수정한 내용으로 다시 렌더링!
     if (document.getElementById('view-modal').style.display === 'flex') {
       viewAnyFormula(currentEditTarget);
     }
@@ -916,7 +916,9 @@
       if (deckIdx > -1) {
         shuffledDeck.splice(deckIdx, 1);
         if (deckIdx === currentIndex) {
-          if (currentIndex >= shuffledDeck.length) { currentIndex = 0; }
+          if (currentIndex >= shuffledDeck.length) { 
+            resetDeck(); // 여기서도 카드를 다 지워서 덱이 끝났을 땐 확실하게 턴을 넘기도록 수정했어!
+          }
         } else if (deckIdx < currentIndex) {
           currentIndex--;
         }
@@ -935,7 +937,6 @@
     if (document.getElementById('all-list-modal').style.display === 'flex') openAllListModal();
     if (document.getElementById('mastered-modal').style.display === 'flex') openMasteredModal();
 
-    // ★ 추가: 삭제된 경우에는 볼 내용이 없으니 상세 보기 창을 닫아줌!
     closeViewModal();
   }
 
@@ -1008,7 +1009,6 @@
   }
 
   function editViewedFormula() {
-    // ★ 삭제된 부분: 여기서 closeViewModal(); 을 지워서 상세 보기 창을 살려둠!
     openFormModal('edit', currentViewTarget);
   }
 
